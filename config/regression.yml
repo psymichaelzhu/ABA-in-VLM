@@ -1,0 +1,22 @@
+# Regression and coefficient-figure settings
+run:
+  # Compare matched 100k Full and Random sweeps within each layout.
+  sweeps:
+    - FullGrey224_100k_sweep
+    - FullWhite224_100k_sweep
+    - FullBlack224_100k_sweep
+  priority_modes: [absolute, relative]
+
+regression:
+  affective_predictors: [Arousal, Valence]
+  visual_predictors: [Ldim_mean]
+  correction:
+    method: bonferroni
+    scope: [Metric, Variant_id]
+    predictors: [Arousal, Valence]
+    alpha: 0.05
+
+visualization:
+  predictors: [Arousal, Valence]
+  metric: attention_layer
+  variant_id: last_max_mean

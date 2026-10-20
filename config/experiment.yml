@@ -1,0 +1,213 @@
+
+# %% Layout presets
+layouts:
+  grey_224: &grey_224
+    unit: pixel
+    canvas_size: [224, 224]
+    item_size: [96, 96]
+    positions:
+      - [0, 64]
+      - [128, 64]
+    background: [128, 128, 128]
+
+  white_224:
+    <<: *grey_224
+    background: [255, 255, 255]
+
+  black_224:
+    <<: *grey_224
+    background: [0, 0, 0]
+
+  adjacent_192x96:
+    <<: *grey_224
+    canvas_size: [192, 96]
+    positions:
+      - [0, 0]
+      - [96, 0]
+
+
+# %% Trial design presets
+trial_designs:
+  pairwise_100k: &pairwise_100k
+    n_trials: 100000
+    n_items_per_trial: 2
+    sampling_seed: 42
+
+  pairwise_50k:
+    <<: *pairwise_100k
+    n_trials: 50000
+
+# %% Metric presets
+metrics:
+  full:
+    embedding_similarity:
+      semi_encode_image:
+        present: semi
+        embedding_function: encode_image
+      semi_visual:
+        present: semi
+        embedding_function: visual
+      isolate_visual:
+        present: isolate
+        embedding_function: visual
+      isolate_encode_image:
+        present: isolate
+        embedding_function: encode_image
+
+    attention_layer:
+      first_max_mean: &layer_0
+        layer: 0
+        head_aggregation: max
+        region_summary: mean
+      last_max_mean:
+        <<: *layer_0
+        layer: -1
+
+    attention_rollout:
+      max_070_mean: &rollout_070
+        head_aggregation: max
+        discard_ratio: 0.70
+        region_summary: mean
+      max_000_mean:
+        <<: *rollout_070
+        discard_ratio: 0.00
+
+  semi_visual_only:
+    embedding_similarity:
+      semi_visual:
+        present: semi
+        embedding_function: visual
+
+# %% Protocol presets
+protocol_presets:
+  FullGrey224: &full_grey_protocol
+    layout: grey_224
+    metrics: full
+    trial_design: pairwise_50k
+
+  FullWhite224:
+    <<: *full_grey_protocol
+    layout: white_224
+
+  FullBlack224:
+    <<: *full_grey_protocol
+    layout: black_224
+
+  FullAdjacent:
+    <<: *full_grey_protocol
+    layout: adjacent_192x96
+
+  FullGrey224_100k: &full_grey_100k
+    <<: *full_grey_protocol
+    trial_design: pairwise_100k
+
+  FullWhite224_100k:
+    <<: *full_grey_100k
+    layout: white_224
+
+  FullBlack224_100k:
+    <<: *full_grey_100k
+    layout: black_224
+
+  FullAdjacent_100k:
+    <<: *full_grey_100k
+    layout: adjacent_192x96
+
+  RandomGrey224_100k: &random_grey_100k
+    layout: grey_224
+    metrics: semi_visual_only
+    trial_design: pairwise_100k
+
+  RandomWhite224_100k:
+    <<: *random_grey_100k
+    layout: white_224
+
+  RandomBlack224_100k:
+    <<: *random_grey_100k
+    layout: black_224
+
+  RandomAdjacent_100k:
+    <<: *random_grey_100k
+    layout: adjacent_192x96
+
+# %% Experiment sweeps
+experiment_sweeps:
+  FullGrey224_sweep: &base_sweep
+    protocol: FullGrey224
+    models:
+      - slip_large_25ep
+      - clip_large_25ep
+      - simclr_large_25ep
+
+      - clip_small_25ep
+      - simclr_small_25ep
+      - slip_small_25ep
+
+      - clip_base_25ep
+      - simclr_base_25ep
+      - slip_base_25ep
+
+    imagesets:
+      OASIS: [all]
+      EmoMadrid: [all]
+      NAPS: [all]
+
+  FullWhite224_sweep:
+    <<: *base_sweep
+    protocol: FullWhite224
+
+  FullBlack224_sweep:
+    <<: *base_sweep
+    protocol: FullBlack224
+
+  FullAdjacent_sweep:
+    <<: *base_sweep
+    protocol: FullAdjacent
+
+
+  FullGrey224_100k_sweep: &base_100k_sweep
+    <<: *base_sweep
+    protocol: FullGrey224_100k
+
+  FullWhite224_100k_sweep:
+    <<: *base_100k_sweep
+    protocol: FullWhite224_100k
+
+  FullBlack224_100k_sweep:
+    <<: *base_100k_sweep
+    protocol: FullBlack224_100k
+
+  FullAdjacent_100k_sweep:
+    <<: *base_100k_sweep
+    protocol: FullAdjacent_100k
+
+
+  RandomGrey224_100k_sweep: &random_grey_sweep
+    protocol: RandomGrey224_100k
+    models:
+      - random_vits16_seed42
+      - random_vitb16_seed42
+      - random_vitl16_seed42
+    imagesets:
+      OASIS: [all]
+      EmoMadrid: [all]
+      NAPS: [all]
+
+  RandomWhite224_100k_sweep:
+    <<: *random_grey_sweep
+    protocol: RandomWhite224_100k
+
+  RandomBlack224_100k_sweep:
+    <<: *random_grey_sweep
+    protocol: RandomBlack224_100k
+
+  RandomAdjacent_100k_sweep:
+    <<: *random_grey_sweep
+    protocol: RandomAdjacent_100k
+
+# %% Active run
+run:
+  sweep: 
+    - RandomGrey224_100k_sweep
+    - RandomWhite224_100k_sweep
+    - RandomBlack224_100k_sweep
