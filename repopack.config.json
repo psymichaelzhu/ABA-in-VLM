@@ -1,0 +1,18 @@
+{
+  "output": {
+    "filePath": "repomix-output.txt"
+  },
+  "exclude": [
+    "**/node_modules/**",
+    "**/.git/**",
+    "**/*.pdf",
+    "**/*.png",
+    "**/*.jpg",
+    "**/*.zip",
+    "**/*.tar.gz",
+    "stimuli/**",
+    "data/**",
+    "results/**",
+    "analysis_results/**"
+  ]
+}
